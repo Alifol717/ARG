@@ -21,6 +21,8 @@
             /* 叠加半透深色遮罩，防止背景太亮看不清文字 */
             background-color: rgba(0, 20, 30, 0.45);
             background-blend-mode: multiply;
+            /* 初始隐藏页面主体 */
+            display: none;
         }
 
         /* 顶部标题区域 */
@@ -407,6 +409,25 @@
     </div>
 
 <script>
+// ========== 新增密码校验逻辑 ==========
+// 正确密码，可自行修改
+const correctPassword = "xiyu128";
+
+// 循环弹窗输入密码，直到输入正确
+function checkPassword() {
+    let inputPwd = prompt("请输入日记本访问密码：");
+    // 点取消 / 密码错误 重新弹窗
+    if (inputPwd === null || inputPwd !== correctPassword) {
+        alert("密码错误，请重新输入！");
+        checkPassword();
+    } else {
+        // 密码正确，显示页面
+        document.body.style.display = "block";
+    }
+}
+// 页面加载立刻执行密码校验
+checkPassword();
+
 // 格式：'关键词':'对应网址'，逗号分隔，可自行增删
 const keywordMap = {
     '日记': 'https://www.baidu.com',
@@ -437,7 +458,9 @@ allReadBtn.forEach(item => {
     item.addEventListener('click', () => {
         // 获取当前点击元素身上存好的独立网址
         const targetLink = item.getAttribute('data-url');
-        window.open(targetLink, '_blank');
+        if(targetLink){
+            window.open(targetLink, '_blank');
+        }
     })
 })
 </script>
