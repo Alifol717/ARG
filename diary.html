@@ -413,20 +413,120 @@
 // 正确密码，可自行修改
 const correctPassword = "xiyu128";
 
-// 循环弹窗输入密码，直到输入正确
-function checkPassword() {
-    let inputPwd = prompt("请输入日记本访问密码：");
-    // 点取消 / 密码错误 重新弹窗
-    if (inputPwd === null || inputPwd !== correctPassword) {
-        alert("密码错误，请重新输入！");
-        checkPassword();
-    } else {
-        // 密码正确，显示页面
-        document.body.style.display = "block";
+function showPasswordModal() {
+    // 创建遮罩层
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "rgba(0, 0, 0, 0.85)";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = "99999";
+
+    // 创建密码弹窗【适配暗黑页面，改为半透深色磨砂】
+    const modal = document.createElement("div");
+    modal.style.background = "rgba(20, 30, 40, 0.75)";
+    modal.style.backdropFilter = "blur(14px)";
+    modal.style.color = "#f0e8e8";
+    modal.style.padding = "28px 24px";
+    modal.style.borderRadius = "18px";
+    modal.style.width = "320px";
+    modal.style.boxShadow = "0 4px 24px rgba(0, 0, 0, 0.4)";
+    modal.style.border = "1px solid rgba(255,255,255,0.12)";
+
+    const title = document.createElement("div");
+    title.innerText = "沉没的日记本";
+    title.style.fontSize = "20px";
+    title.style.fontWeight = "500";
+    title.style.marginBottom = "20px";
+    title.style.textAlign = "center";
+    title.style.color = "#ffffff";
+    title.style.letterSpacing = "2px";
+
+    const input = document.createElement("input");
+    input.type = "password";
+    input.placeholder = "请输入日记本访问密码";
+    input.style.width = "100%";
+    input.style.padding = "11px 14px";
+    input.style.border = "1px solid rgba(255,255,255,0.18)";
+    input.style.borderRadius = "10px";
+    input.style.fontSize = "16px";
+    input.style.marginBottom = "20px";
+    input.style.outline = "none";
+    input.style.background = "rgba(255,255,255,0.1)";
+    input.style.color = "#fff";
+    input.style.placeholderColor = "#c0b8c8";
+
+    const btnWrap = document.createElement("div");
+    btnWrap.style.display = "flex";
+    btnWrap.style.justifyContent = "flex-end";
+    btnWrap.style.gap = "12px";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.innerText = "取消";
+    cancelBtn.style.padding = "9px 18px";
+    cancelBtn.style.border = "none";
+    cancelBtn.style.borderRadius = "10px";
+    cancelBtn.style.background = "rgba(255,255,255,0.15)";
+    cancelBtn.style.color = "#e0d8dc";
+    cancelBtn.style.cursor = "pointer";
+    cancelBtn.style.fontSize = "15px";
+
+    const confirmBtn = document.createElement("button");
+    confirmBtn.innerText = "确定";
+    confirmBtn.style.padding = "9px 18px";
+    confirmBtn.style.border = "none";
+    confirmBtn.style.borderRadius = "10px";
+    confirmBtn.style.background = "#e8b0c0";
+    confirmBtn.style.color = "#111";
+    confirmBtn.style.cursor = "pointer";
+    confirmBtn.style.fontSize = "15px";
+
+    btnWrap.appendChild(cancelBtn);
+    btnWrap.appendChild(confirmBtn);
+    modal.appendChild(title);
+    modal.appendChild(input);
+    modal.appendChild(btnWrap);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // 自动聚焦输入框
+    input.focus();
+
+    // 验证密码
+    function verify() {
+        const inputPwd = input.value.trim();
+
+        if (inputPwd === correctPassword) {
+            overlay.remove();
+            document.body.style.display = "block";
+        } else {
+            alert("密码错误，请重新输入！");
+            input.value = "";
+            input.focus();
+        }
     }
+
+    confirmBtn.addEventListener("click", verify);
+
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            verify();
+        }
+    });
+
+    // 取消按钮：清空输入框+刷新页面（无法绕过密码）
+    cancelBtn.addEventListener("click", function () {
+        location.reload();
+    });
 }
-// 页面加载立刻执行密码校验
-checkPassword();
+
+// 页面加载时先显示密码弹窗
+showPasswordModal();
 
 // 格式：'关键词':'对应网址'，逗号分隔，可自行增删
 const keywordMap = {
