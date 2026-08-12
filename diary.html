@@ -11,21 +11,88 @@
             box-sizing: border-box;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
         }
-
+        /* 先让body可见，解锁后再隐藏 */
         body {
-            /* ========== 改动核心：替换为时钟水池背景图 ========== */
-            background: url('./clock.jpg') center center / cover no-repeat fixed;
             min-height: 100vh;
             padding: 40px 60px;
             color: #f0e8e8;
-            /* 叠加半透深色遮罩，防止背景太亮看不清文字 */
-            background-color: rgba(0, 20, 30, 0.45);
+            background: rgba(0, 20, 30, 0.6);
             background-blend-mode: multiply;
-            /* 初始隐藏页面主体 */
+            /* 默认可见，JS解锁后再展示完整背景 */
+            display: block;
+        }
+        /* 页面内容容器，默认隐藏，密码正确再显示 */
+        .page-wrap {
             display: none;
         }
+        /* 弹窗遮罩全局样式，提前定义，避免JS动态样式失效 */
+        #pwdOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        #pwdModal {
+            width: 320px;
+            padding: 28px 24px;
+            background: rgba(20,30,40,0.75);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        #pwdTitle {
+            font-size: 20px;
+            text-align: center;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        #pwdInput {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        #pwdInput::placeholder {
+            color: #c0b8c8;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .cancel-btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            color: #e0d8dc;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .confirm-btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #e8b0c0;
+            color: #111;
+            font-size: 15px;
+            cursor: pointer;
+        }
 
-        /* 顶部标题区域 */
+        /* 原有日记页面样式不变 */
         .page-header {
             text-align: center;
             margin-bottom: 50px;
@@ -37,11 +104,6 @@
             color: #ffffff;
             font-weight: 500;
         }
-        .page-header p {
-            margin-top: 10px;
-            color: #d0c8ce;
-            letter-spacing: 2px;
-        }
         .decor-star {
             position: absolute;
             color: #e2d0d8;
@@ -51,19 +113,15 @@
         .star-right { top: 30px; right: 40px; }
         .star-bottom { bottom: 10px; left: 10%; }
 
-        /* 主体布局：侧边栏+内容区 */
         .main-wrap {
             display: flex;
             gap: 40px;
         }
-
-        /* 左侧固定侧边栏 */
         .sidebar {
             width: 220px;
             flex-shrink: 0;
         }
         .user-card {
-            /* 加深卡片透明度，适配深色背景 */
             background: rgba(255, 255, 255, 0.18);
             backdrop-filter: blur(12px);
             border-radius: 16px;
@@ -71,7 +129,6 @@
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 10, 15, 0.35);
             margin-bottom: 24px;
-            position: relative;
         }
         .moon-icon {
             width: 70px;
@@ -110,8 +167,6 @@
             font-size: 12px;
             color: #e0d8dc;
         }
-
-        /* 侧边导航菜单 */
         .side-nav {
             background: rgba(255,255,255,0.12);
             border-radius: 14px;
@@ -130,7 +185,6 @@
         }
         .nav-item.active {
             background: rgba(255,255,255,0.25);
-            box-shadow: 0 2px 8px rgba(0, 15, 25, 0.3);
         }
         .category-title {
             margin: 16px 0 8px;
@@ -147,8 +201,6 @@
             font-size: 14px;
             color: #e8e0e4;
         }
-
-        /* 右侧日记主内容区 */
         .content-area {
             flex: 1;
         }
@@ -179,7 +231,6 @@
         .search-input::placeholder{
             color:#d0c8ce;
         }
-        /* 页码板块样式 小巧磨砂 统一风格 */
         .page-num {
             padding: 6px 12px;
             background: rgba(255,255,255,0.12);
@@ -189,8 +240,6 @@
             color: #d0c8ce;
             flex-shrink: 0;
         }
-
-        /* 日记卡片通用样式 */
         .diary-card {
             background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
@@ -199,7 +248,6 @@
             margin-bottom: 20px;
             display: flex;
             gap: 18px;
-            box-shadow: 0 3px 12px rgba(0, 10, 18, 0.3);
         }
         .diary-card.pink-border {
             border-left: 6px solid #e8b0c0;
@@ -235,10 +283,6 @@
             font-weight: 500;
             color: #ffffff;
         }
-        .diary-weather {
-            font-size: 14px;
-            color: #d8d0d4;
-        }
         .diary-text {
             font-size: 15px;
             color: #e8e0e4;
@@ -255,280 +299,154 @@
     </style>
 </head>
 <body>
-    <!-- 顶部标题 -->
-    <div class="page-header">
-        <span class="decor-star star-top">✦</span>
-        <h1>沉没的日记本</h1>
-        <span class="decor-star star-right">✦</span>
-        <span class="decor-star star-bottom">✦</span>
-    </div>
-
-    <div class="main-wrap">
-        <!-- 左侧侧边栏 -->
-        <div class="sidebar">
-            <div class="user-card">
-                <div class="moon-icon">☾</div>
-                <div class="user-name">西玉</div>
-                <div class="user-desc">密码线索</div>
-                <div class="data-row">
-                    <div class="data-item">
-                        <span>128</span>
-                        <span>日记</span>
-                    </div>
-                    <div class="data-item">
-                        <span>365</span>
-                        <span>天</span>
-                    </div>
-                    <div class="data-item">
-                        <span>12</span>
-                        <span>分类</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="side-nav">
-                <div class="nav-item active">
-                    <span>🏠</span> 首页
-                </div>
-                <div class="nav-item">
-                    <span>📋</span> 归档
-                </div>
-                <div class="nav-item">
-                    <span>👤</span> 关于
-                </div>
-
-                <div class="category-title">
-                    <span>日记分类</span>
-                    <span>▲</span>
-                </div>
-                <div class="category-item">
-                    <span>● 生活随笔</span>
-                    <span>12</span>
-                </div>
-                <div class="category-item">
-                    <span>● 读书笔记</span>
-                    <span>8</span>
-                </div>
+    <!-- 固定提前渲染弹窗DOM，不会白屏 -->
+    <div id="pwdOverlay">
+        <div id="pwdModal">
+            <div id="pwdTitle">沉没的日记本</div>
+            <input id="pwdInput" type="password" placeholder="请输入日记本访问密码">
+            <div class="btn-group">
+                <button class="cancel-btn">取消</button>
+                <button class="confirm-btn">确定</button>
             </div>
         </div>
+    </div>
 
-        <!-- 右侧日记内容 -->
-        <div class="content-area">
-            <div class="content-head">
-                <h2>📖 2026.8.19</h2>
-                <input class="search-input" id="searchInput" placeholder="搜索日记..." type="text">
-		<!-- 页码板块 右上角 -->
-    		<div class="page-num">1/35</div>
-            </div>
+    <!-- 页面主体内容容器，默认隐藏 -->
+    <div class="page-wrap">
+        <div class="page-header">
+            <span class="decor-star star-top">✦</span>
+            <h1>沉没的日记本</h1>
+            <span class="decor-star star-right">✦</span>
+            <span class="decor-star star-bottom">✦</span>
+        </div>
 
-            <!-- 第一篇日记 -->
-            <div class="diary-card pink-border">
-                <div class="diary-date">
-                    <div class="day">3</div>
-                    <div class="ym">7月·周五</div>
+        <div class="main-wrap">
+            <div class="sidebar">
+                <div class="user-card">
+                    <div class="moon-icon">☾</div>
+                    <div class="user-name">西玉</div>
+                    <div class="user-desc">密码线索</div>
+                    <div class="data-row">
+                        <div class="data-item"><span>128</span><span>日记</span></div>
+                        <div class="data-item"><span>365</span><span>天</span></div>
+                        <div class="data-item"><span>12</span><span>分类</span></div>
+                    </div>
                 </div>
-                <div class="diary-main">
-                    <div class="diary-top">
+                <div class="side-nav">
+                    <div class="nav-item active">🏠 首页</div>
+                    <div class="nav-item">📋 归档</div>
+                    <div class="nav-item">👤 关于</div>
+                    <div class="category-title"><span>日记分类</span><span>▲</span></div>
+                    <div class="category-item"><span>● 生活随笔</span><span>12</span></div>
+                    <div class="category-item"><span>● 读书笔记</span><span>8</span></div>
+                </div>
+            </div>
+            <div class="content-area">
+                <div class="content-head">
+                    <h2>📖 2026.8.19</h2>
+                    <input class="search-input" id="searchInput" placeholder="搜索日记..." type="text">
+                    <div class="page-num">1/35</div>
+                </div>
+                <div class="diary-card pink-border">
+                    <div class="diary-date">
+                        <div class="day">3</div>
+                        <div class="ym">7月·周五</div>
+                    </div>
+                    <div class="diary-main">
                         <div class="diary-text">终于放暑假了...累死我了，但是有时间见面啦...期待</div>
+                        <div class="enter-link" data-url="https://www.bing.com">查看全文 →</div>
                     </div>
-                    <div class="enter-link" data-url="https://www.bing.com">查看全文 →</div>
                 </div>
-            </div>
-
-            <!-- 第二篇日记 -->
-            <div class="diary-card blue-border">
-                <div class="diary-date">
-                    <div class="day">10</div>
-                    <div class="ym">3月·周日</div>
-                </div>
-                <div class="diary-main">
-                    <div class="diary-top">
-                        <div class="diary-title">读《瓦尔登湖》有感</div>
+                <div class="diary-card blue-border">
+                    <div class="diary-date">
+                        <div class="day">10</div>
+                        <div class="ym">3月·周日</div>
                     </div>
-                    <div class="diary-text">重读梭罗的《瓦尔登湖》，对简单生活有了新的理解……</div>
-                    <div class="enter-link" data-url="https://zh.wikipedia.org">查看全文 →</div>
-                </div>
-            </div>
-
-	    <!-- 第三篇日记 -->
-            <div class="diary-card blue-border">
-                <div class="diary-date">
-                    <div class="day">24</div>
-                    <div class="ym">5月·周六</div>
-                </div>
-                <div class="diary-main">
-                    <div class="diary-top">
+                    <div class="diary-main">
+                        <div class="diary-top"><div class="diary-title">读《瓦尔登湖》有感</div></div>
+                        <div class="diary-text">重读梭罗的《瓦尔登湖》，对简单生活有了新的理解……</div>
+                        <div class="enter-link" data-url="https://zh.wikipedia.org">查看全文 →</div>
                     </div>
-                    <div class="diary-text">想你了...</div>
-                    <div class="enter-link" data-url="https://weibo.com">查看全文 →</div>
                 </div>
-            </div>
-
-	    <!-- 第4篇日记 -->
-            <div class="diary-card blue-border">
-                <div class="diary-date">
-                    <div class="day">24</div>
-                    <div class="ym">5月·周六</div>
-                </div>
-                <div class="diary-main">
-                    <div class="diary-top">
+                <div class="diary-card blue-border">
+                    <div class="diary-date">
+                        <div class="day">24</div>
+                        <div class="ym">5月·周六</div>
                     </div>
-                    <div class="diary-text">想你了...</div>
-                    <div class="enter-link">查看全文 →</div>
-                </div>
-            </div>
-
-	    <!-- 第5篇日记 -->
-            <div class="diary-card blue-border">
-                <div class="diary-date">
-                    <div class="day">24</div>
-                    <div class="ym">5月·周六</div>
-                </div>
-                <div class="diary-main">
-                    <div class="diary-top">
+                    <div class="diary-main">
+                        <div class="diary-text">想你了...</div>
+                        <div class="enter-link" data-url="https://weibo.com">查看全文 →</div>
                     </div>
-                    <div class="diary-text">想你了...</div>
-                    <div class="enter-link">查看全文 →</div>
                 </div>
-            </div>
-
-	    <!-- 第6篇日记 -->
-            <div class="diary-card blue-border">
-                <div class="diary-date">
-                    <div class="day">24</div>
-                    <div class="ym">5月·周六</div>
-                </div>
-                <div class="diary-main">
-                    <div class="diary-top">
+                <div class="diary-card blue-border">
+                    <div class="diary-date">
+                        <div class="day">24</div>
+                        <div class="ym">5月·周六</div>
                     </div>
-                    <div class="diary-text">想你了...</div>
-                    <div class="enter-link">查看全文 →</div>
+                    <div class="diary-main">
+                        <div class="diary-text">想你了...</div>
+                        <div class="enter-link">查看全文 →</div>
+                    </div>
+                </div>
+                <div class="diary-card blue-border">
+                    <div class="diary-date">
+                        <div class="day">24</div>
+                        <div class="ym">5月·周六</div>
+                    </div>
+                    <div class="diary-main">
+                        <div class="diary-text">想你了...</div>
+                        <div class="enter-link">查看全文 →</div>
+                    </div>
+                </div>
+                <div class="diary-card blue-border">
+                    <div class="diary-date">
+                        <div class="day">24</div>
+                        <div class="ym">5月·周六</div>
+                    </div>
+                    <div class="diary-main">
+                        <div class="diary-text">想你了...</div>
+                        <div class="enter-link">查看全文 →</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
 <script>
-// ========== 新增密码校验逻辑 ==========
-// 正确密码，可自行修改
-const correctPassword = "xiyu128";
+// 密码（和你线索匹配 xiyu128）
+const correctPwd = "xiyu128";
+// 获取DOM元素（页面已经提前写死弹窗，不会创建失败）
+const overlay = document.getElementById("pwdOverlay");
+const pwdInput = document.getElementById("pwdInput");
+const confirmBtn = document.querySelector(".confirm-btn");
+const cancelBtn = document.querySelector(".cancel-btn");
+const pageWrap = document.querySelector(".page-wrap");
 
-function showPasswordModal() {
-    // 创建遮罩层
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(0, 0, 0, 0.85)";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = "99999";
+// 自动聚焦输入框
+pwdInput.focus();
 
-    // 创建密码弹窗【适配暗黑页面，改为半透深色磨砂】
-    const modal = document.createElement("div");
-    modal.style.background = "rgba(20, 30, 40, 0.75)";
-    modal.style.backdropFilter = "blur(14px)";
-    modal.style.color = "#f0e8e8";
-    modal.style.padding = "28px 24px";
-    modal.style.borderRadius = "18px";
-    modal.style.width = "320px";
-    modal.style.boxShadow = "0 4px 24px rgba(0, 0, 0, 0.4)";
-    modal.style.border = "1px solid rgba(255,255,255,0.12)";
-
-    const title = document.createElement("div");
-    title.innerText = "沉没的日记本";
-    title.style.fontSize = "20px";
-    title.style.fontWeight = "500";
-    title.style.marginBottom = "20px";
-    title.style.textAlign = "center";
-    title.style.color = "#ffffff";
-    title.style.letterSpacing = "2px";
-
-    const input = document.createElement("input");
-    input.type = "password";
-    input.placeholder = "请输入日记本访问密码";
-    input.style.width = "100%";
-    input.style.padding = "11px 14px";
-    input.style.border = "1px solid rgba(255,255,255,0.18)";
-    input.style.borderRadius = "10px";
-    input.style.fontSize = "16px";
-    input.style.marginBottom = "20px";
-    input.style.outline = "none";
-    input.style.background = "rgba(255,255,255,0.1)";
-    input.style.color = "#fff";
-    input.style.placeholderColor = "#c0b8c8";
-
-    const btnWrap = document.createElement("div");
-    btnWrap.style.display = "flex";
-    btnWrap.style.justifyContent = "flex-end";
-    btnWrap.style.gap = "12px";
-
-    const cancelBtn = document.createElement("button");
-    cancelBtn.innerText = "取消";
-    cancelBtn.style.padding = "9px 18px";
-    cancelBtn.style.border = "none";
-    cancelBtn.style.borderRadius = "10px";
-    cancelBtn.style.background = "rgba(255,255,255,0.15)";
-    cancelBtn.style.color = "#e0d8dc";
-    cancelBtn.style.cursor = "pointer";
-    cancelBtn.style.fontSize = "15px";
-
-    const confirmBtn = document.createElement("button");
-    confirmBtn.innerText = "确定";
-    confirmBtn.style.padding = "9px 18px";
-    confirmBtn.style.border = "none";
-    confirmBtn.style.borderRadius = "10px";
-    confirmBtn.style.background = "#e8b0c0";
-    confirmBtn.style.color = "#111";
-    confirmBtn.style.cursor = "pointer";
-    confirmBtn.style.fontSize = "15px";
-
-    btnWrap.appendChild(cancelBtn);
-    btnWrap.appendChild(confirmBtn);
-    modal.appendChild(title);
-    modal.appendChild(input);
-    modal.appendChild(btnWrap);
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // 自动聚焦输入框
-    input.focus();
-
-    // 验证密码
-    function verify() {
-        const inputPwd = input.value.trim();
-
-        if (inputPwd === correctPassword) {
-            overlay.remove();
-            document.body.style.display = "block";
-        } else {
-            alert("密码错误，请重新输入！");
-            input.value = "";
-            input.focus();
-        }
+// 密码验证函数
+function checkPwd() {
+    const inputVal = pwdInput.value.trim();
+    if(inputVal === correctPwd) {
+        overlay.remove(); // 删除密码弹窗
+        pageWrap.style.display = "block"; // 展示完整日记页面
+        // 解锁后加载背景图（防止缺失图片阻塞白屏）
+        document.body.style.backgroundImage = "url('./clock.jpg')";
+    } else {
+        alert("密码错误，请重新输入！");
+        pwdInput.value = "";
+        pwdInput.focus();
     }
-
-    confirmBtn.addEventListener("click", verify);
-
-    input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-            verify();
-        }
-    });
-
-    // 取消按钮：清空输入框+刷新页面（无法绕过密码）
-    cancelBtn.addEventListener("click", function () {
-        location.reload();
-    });
 }
 
-// 页面加载时先显示密码弹窗
-showPasswordModal();
+// 绑定点击和回车事件
+confirmBtn.addEventListener("click", checkPwd);
+pwdInput.addEventListener("keydown", e => e.key === "Enter" && checkPwd());
+// 取消按钮刷新页面，无法绕过
+cancelBtn.addEventListener("click", () => location.reload());
 
-// 格式：'关键词':'对应网址'，逗号分隔，可自行增删
+// 搜索跳转逻辑
 const keywordMap = {
     '日记': 'https://www.baidu.com',
     'note': 'https://www.baidu.com',
@@ -537,30 +455,19 @@ const keywordMap = {
     '维基': 'https://zh.wikipedia.org',
     '小红书': 'https://xiaohongshu.com'
 };
-
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('keydown', function(e) {
     if(e.key === 'Enter'){
         let inputVal = this.value.trim().toLowerCase();
-        // 判断输入内容是否在映射表里
-        if(keywordMap[inputVal]){
-            // 读取对应网址，新标签打开
-            window.open(keywordMap[inputVal], '_blank');
-        }
-        // 无匹配关键词，不执行任何操作
+        if(keywordMap[inputVal]) window.open(keywordMap[inputVal], '_blank');
     }
 })
 
-
-// 修改后的查看全文逻辑：读取每个标签自己的data-url链接
-const allReadBtn = document.querySelectorAll('.enter-link');
-allReadBtn.forEach(item => {
+// 日记链接跳转
+document.querySelectorAll('.enter-link').forEach(item => {
     item.addEventListener('click', () => {
-        // 获取当前点击元素身上存好的独立网址
-        const targetLink = item.getAttribute('data-url');
-        if(targetLink){
-            window.open(targetLink, '_blank');
-        }
+        const link = item.getAttribute('data-url');
+        if(link) window.open(link, '_blank');
     })
 })
 </script>
