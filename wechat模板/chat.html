@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天窗口</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+        }
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+        /* 聊天顶部导航 */
+        .chat-top-bar {
+            height: 48px;
+            background: #f7f7f7;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .back-btn {
+            font-size: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .chat-title-name {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+        }
+        /* 聊天消息区域（可滚动） */
+        .msg-wrap {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+        /* 消息通用 */
+        .msg-row {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .msg-row.self {
+            flex-direction: row-reverse;
+        }
+        .msg-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .msg-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .msg-text {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        /* 对方消息灰色气泡 */
+        .msg-row.other .msg-text {
+            background: #ffffff;
+        }
+        /* 自己绿色气泡 */
+        .msg-row.self .msg-text {
+            background: #95ec69;
+        }
+        /* 底部输入框 */
+        .input-bar {
+            height: 50px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            border-top: 1px solid #eee;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            height: 36px;
+            border-radius: 6px;
+            background: #f4f4f4;
+            border: none;
+            padding: 0 12px;
+            font-size: 15px;
+        }
+        .send-btn {
+            padding: 6px 14px;
+            background: #07c160;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部返回栏 -->
+    <div class="chat-top-bar">
+        <span class="back-btn" onclick="history.back()">&lt;</span>
+        <div class="chat-title-name" id="chatName"></div>
+        <span>⋯</span>
+    </div>
+
+    <!-- 消息容器 -->
+    <div class="msg-wrap" id="msgBox"></div>
+
+    <!-- 底部输入 -->
+    <div class="input-bar">
+        <input class="chat-input" placeholder="输入消息...">
+        <div class="send-btn">发送</div>
+    </div>
+
+    <script>
+        // 1. 好友数据配置：名称、头像、聊天记录
+        const friendData = {
+            chenmo: {
+                name: "陈默",
+                avatar: "https://picsum.photos/id/64/40/40",
+                records: [
+                    {type:"other", text:"明天出来玩吧"},
+                    {type:"self", text:"ok"},
+                    {type:"self", text:"ok"},
+                    {type:"other", text:"明天出来玩吧"},
+                    {type:"other", text:"明天出来玩吧"},
+                    {type:"self", text:"ok"},
+                    {type:"self", text:"ok"},
+                    {type:"other", text:"明天出来玩吧"},
+                    {type:"other", text:"明天出来玩吧"},
+                    {type:"self", text:"ok"},
+                    {type:"other", text:"明天见"},
+                ]
+            },
+            linxia: {
+                name: "我",
+                avatar: "https://picsum.photos/id/1005/40/40",
+                records: [
+                    {type:"self", text:"好久不见，最近还好吗？"},
+                    {type:"self", text:"好久不见，最近还好吗？"},
+                    {type:"self", text:"好久不见，最近还好吗？"},
+                ]
+            },
+            police: {
+                name: "公众号",
+                avatar: "https://picsum.photos/id/1074/40/40",
+                records: [
+                    {type:"other", text:"你好，有些情况需要向你核实"},
+                    {type:"other", text:"警方已经介入调查，请配合我们的问询工作"}
+                ]
+            }
+        };
+
+        // 2. 获取地址栏 uid 参数
+        const urlParams = new URLSearchParams(location.search);
+        const uid = urlParams.get("uid");
+        const data = friendData[uid];
+
+        // 3. 渲染页面标题、头像、聊天记录
+        document.getElementById("chatName").innerText = data.name;
+        const msgBox = document.getElementById("msgBox");
+        let html = "";
+        data.records.forEach(item => {
+            if(item.type === "other"){
+                // 对方头像增加点击跳转个人资料页 profile.html
+                html += `
+                    <div class="msg-row other">
+                        <div class="msg-avatar" onclick="location.href='profile.html?uid=${uid}'">
+                            <img src="${data.avatar}">
+                        </div>
+                        <div class="msg-text">${item.text}</div>
+                    </div>
+                `;
+            }else{
+                // 自己的头像无点击事件
+                html += `
+                    <div class="msg-row self">
+                        <div class="msg-avatar">
+                            <img src="https://picsum.photos/id/237/40/40">
+                        </div>
+                        <div class="msg-text">${item.text}</div>
+                    </div>
+                `;
+            }
+        });
+        msgBox.innerHTML = html;
+        // 打开页面自动滚动到最新消息底部
+        msgBox.scrollTop = msgBox.scrollHeight;
+    </script>
+</body>
+</html>
